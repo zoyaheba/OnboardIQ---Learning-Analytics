@@ -417,8 +417,12 @@ export default function ManagerPage() {
                           Same K/V/E derivation + KMeans(k=3) applied to{" "}
                           <span className="text-white font-medium">{ov.n_students} real students</span>{" "}
                           from the Open University Learning Analytics Dataset ({ov.module}).
-                          Silhouette <span className="text-emerald-400 font-semibold">{ov.silhouette_score.toFixed(4)}</span> vs synthetic{" "}
-                          <span className="text-indigo-300 font-semibold">{data.model_validation.silhouette_score.toFixed(4)}</span> — archetypes confirmed in real data.
+                          Silhouette <span className="text-emerald-400 font-semibold">{ov.silhouette_score.toFixed(4)}</span>
+                          {ov.silhouette_score >= 0.50
+                            ? " — strong cluster separation confirmed in real student data. The Project Ready, Needs Coaching, and At-Risk archetypes generalise beyond synthetic users."
+                            : ov.silhouette_score >= 0.40
+                            ? " — moderate cluster separation detected in real student data. Archetypes are present, with some overlap between Needs Coaching and At-Risk."
+                            : " — weaker separation in real student data; archetypes are directionally valid but overlap more than in the synthetic cohort."}
                         </p>
 
                         {/* Centroid cluster summary cards */}
