@@ -1,0 +1,23 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/.env
+
+# Database
+backend/*.db
+backend/*.sqbpro
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# Logs
+.logs/
+*.pids
+.onboardiq.pids
+
+# OS
+.DS_Store
