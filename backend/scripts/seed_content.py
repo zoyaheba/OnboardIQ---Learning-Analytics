@@ -1,9 +1,9 @@
 """
 seed_content.py
 Wipes existing schema, rebuilds all tables, and seeds:
-  - 3 Tracks / 10 Modules each / 10 Concepts each / 5 QuizQuestions each
+  - 3 Tracks / 2 Modules each / 3 Concepts each / 5 QuizQuestions each
   - 4 core users (Learner, Manager x2, Admin)
-  - 50 synthetic onboarding users + quiz_attempts + telemetry_logs
+  - 30 real OULAD-mapped learners + quiz_attempts + telemetry_logs
 """
 
 import sys
