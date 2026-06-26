@@ -614,11 +614,23 @@ def seed():
         # ------------------------------------------------------------------ #
         print("→ Seeding 30 real OULAD-mapped learners under Jordan Manager...")
 
-        ref_module = seeded_modules[0]
-        ref_concept = seeded_concepts[0]
         base_time = now_utc() - timedelta(days=14)
 
-        for profile in REAL_LEARNERS:
+        # Build per-module first-concept lookup
+        module_concepts: dict = {}
+        for concept in seeded_concepts:
+            if concept.module_id not in module_concepts:
+                module_concepts[concept.module_id] = concept
+
+        # seeded_modules layout (2 per track × 3 tracks):
+        #   [0,1] = Actuarial Statistics
+        #   [2,3] = Actuarial Mathematics
+        #   [4,5] = Business Finance
+        # Assign each user 2 modules from different tracks.
+        # Pick one representative module from each track and alternate pairings.
+        TRACK_OFFSETS = [0, 2, 4]  # module 0 = Stats, 2 = Math, 4 = Finance
+
+        for i, profile in enumerate(REAL_LEARNERS):
             user = User(
                 id=uid(),
                 name=profile["name"],
@@ -630,34 +642,43 @@ def seed():
             db.add(user)
             db.flush()
 
-            for attempt_num in range(1, profile["attempts"] + 1):
-                started = base_time + timedelta(
-                    days=random.randint(0, 10),
-                    seconds=random.randint(0, 3600),
-                )
-                completed = started + timedelta(seconds=profile["completion_seconds"])
-                score = float(profile["score"]) if attempt_num == profile["attempts"] else float(profile["score"]) * 0.7
-                quiz_attempt = QuizAttempt(
-                    id=uid(),
-                    user_id=user.id,
-                    module_id=ref_module.id,
-                    attempt_number=attempt_num,
-                    score_percentage=round(score, 2),
-                    is_passed=score >= 70,
-                    started_at=started,
-                    completed_at=completed,
-                )
-                db.add(quiz_attempt)
+            # Pick 2 modules from different tracks
+            idx_a = TRACK_OFFSETS[i % 3]
+            idx_b = TRACK_OFFSETS[(i + 1) % 3]
+            assigned_modules = [seeded_modules[idx_a], seeded_modules[idx_b]]
 
-            for event_type in ("page_opened", "page_closed"):
-                tlog = TelemetryLog(
-                    user_id=user.id,
-                    concept_id=ref_concept.id,
-                    event_type=event_type,
-                    duration_seconds=profile["reading_duration"] if event_type == "page_closed" else None,
-                    timestamp=base_time + timedelta(days=random.randint(0, 10)),
-                )
-                db.add(tlog)
+            for mod in assigned_modules:
+                concept = module_concepts.get(mod.id)
+
+                for attempt_num in range(1, profile["attempts"] + 1):
+                    started = base_time + timedelta(
+                        days=random.randint(0, 10),
+                        seconds=random.randint(0, 3600),
+                    )
+                    completed = started + timedelta(seconds=profile["completion_seconds"])
+                    score = float(profile["score"]) if attempt_num == profile["attempts"] else float(profile["score"]) * 0.7
+                    quiz_attempt = QuizAttempt(
+                        id=uid(),
+                        user_id=user.id,
+                        module_id=mod.id,
+                        attempt_number=attempt_num,
+                        score_percentage=round(score, 2),
+                        is_passed=score >= 70,
+                        started_at=started,
+                        completed_at=completed,
+                    )
+                    db.add(quiz_attempt)
+
+                if concept:
+                    for event_type in ("page_opened", "page_closed"):
+                        tlog = TelemetryLog(
+                            user_id=user.id,
+                            concept_id=concept.id,
+                            event_type=event_type,
+                            duration_seconds=profile["reading_duration"] if event_type == "page_closed" else None,
+                            timestamp=base_time + timedelta(days=random.randint(0, 10)),
+                        )
+                        db.add(tlog)
 
         db.commit()
         print("\n✅ Seeding complete. Summary:")

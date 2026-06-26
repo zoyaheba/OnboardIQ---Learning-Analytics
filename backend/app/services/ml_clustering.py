@@ -317,6 +317,9 @@ def run_clustering_pipeline(db: Session, manager_id: str | None = None) -> Dict[
         else:
             difficulty_label = "Beginner"
 
+        if total_attempts == 0:
+            continue
+
         rows.append({
             "user_id": user.id,
             "user_name": user.name,
