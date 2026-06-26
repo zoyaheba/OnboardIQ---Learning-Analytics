@@ -648,23 +648,37 @@ def seed():
                 seeded_modules[TRACK_OFFSETS[2]],
             ]
 
-            for mod in assigned_modules:
+            # Per-track variation so each track shows a slightly different ORI
+            # Track A: baseline, Track B: mild challenge, Track C: slightly more effort
+            track_deltas = [
+                {"score": 0.0, "completion": 0.0, "reading": 0.0},
+                {"score": -0.03, "completion": 0.10, "reading": -0.15},
+                {"score": -0.06, "completion": 0.20, "reading": -0.25},
+            ]
+
+            for track_idx, mod in enumerate(assigned_modules):
                 concept = module_concepts.get(mod.id)
+                delta = track_deltas[track_idx]
+
+                # Apply per-track deltas while keeping the user within their archetype
+                score_pct = max(0.0, min(100.0, float(profile["score"]) * (1.0 + delta["score"])))
+                completion_seconds = max(30, int(profile["completion_seconds"] * (1.0 + delta["completion"])))
+                reading_duration = max(5, int(profile["reading_duration"] * (1.0 + delta["reading"])))
 
                 for attempt_num in range(1, profile["attempts"] + 1):
                     started = base_time + timedelta(
                         days=random.randint(0, 10),
                         seconds=random.randint(0, 3600),
                     )
-                    completed = started + timedelta(seconds=profile["completion_seconds"])
-                    score = float(profile["score"]) if attempt_num == profile["attempts"] else float(profile["score"]) * 0.7
+                    completed = started + timedelta(seconds=completion_seconds)
+                    attempt_score = score_pct if attempt_num == profile["attempts"] else score_pct * 0.7
                     quiz_attempt = QuizAttempt(
                         id=uid(),
                         user_id=user.id,
                         module_id=mod.id,
                         attempt_number=attempt_num,
-                        score_percentage=round(score, 2),
-                        is_passed=score >= 70,
+                        score_percentage=round(attempt_score, 2),
+                        is_passed=attempt_score >= 70,
                         started_at=started,
                         completed_at=completed,
                     )
@@ -676,7 +690,7 @@ def seed():
                             user_id=user.id,
                             concept_id=concept.id,
                             event_type=event_type,
-                            duration_seconds=profile["reading_duration"] if event_type == "page_closed" else None,
+                            duration_seconds=reading_duration if event_type == "page_closed" else None,
                             timestamp=base_time + timedelta(days=random.randint(0, 10)),
                         )
                         db.add(tlog)
