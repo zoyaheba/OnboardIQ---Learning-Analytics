@@ -19,5 +19,8 @@ frontend/.env.local
 *.pids
 .onboardiq.pids
 
+# OULAD data (large CSVs — download via validate_oulad.py)
+backend/scripts/oulad_data/
+
 # OS
 .DS_Store
