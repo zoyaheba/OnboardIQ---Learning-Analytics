@@ -11,6 +11,7 @@ Builds the full unsupervised clustering pipeline over all seeded users:
 
 import math
 import os
+import time
 from typing import List, Dict, Any, Optional
 
 import numpy as np
@@ -26,13 +27,23 @@ from app.services.scoring import compute_user_scores
 
 _OULAD_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "oulad_data")
 
+# ── In-memory model cache ─────────────────────────────────────────────────────
+# Keyed by manager_id (or "__all__" for global). Stores:
+#   {"n_users": int, "result": dict, "trained_at": float}
+# Cache is invalidated when n_users changes (new learner joined / removed).
+_MODEL_CACHE: Dict[str, Dict] = {}
+_OULAD_CACHE: Dict[str, Any] = {}  # OULAD CSVs never change — cache permanently
 
-def run_oulad_validation(n: int = 30, seed: int = 42) -> Optional[Dict]:
+
+def run_oulad_validation(n: int = 30, seed: int = 42) -> Optional[Dict]:  # noqa: C901
     """
     Reads pre-downloaded OULAD CSVs, derives K/V/E proxies for n students
     from module BBB-2013J, runs StandardScaler+KMeans(k=3), and returns
     silhouette + DBI. Returns None if the data files are not present.
     """
+    if "result" in _OULAD_CACHE:
+        return _OULAD_CACHE["result"]
+
     required = ["studentAssessment.csv", "assessments.csv", "studentInfo.csv", "studentVle.csv"]
     for fname in required:
         if not os.path.exists(os.path.join(_OULAD_DIR, fname)):
@@ -136,7 +147,7 @@ def run_oulad_validation(n: int = 30, seed: int = 42) -> Optional[Dict]:
             "count": int((labels == i).sum()),
         })
 
-    return {
+    oulad_result = {
         "silhouette_score": round(float(silhouette_score(X_scaled, labels)), 4),
         "davies_bouldin_score": round(float(davies_bouldin_score(X_scaled, labels)), 4),
         "n_students": len(sample),
@@ -144,6 +155,8 @@ def run_oulad_validation(n: int = 30, seed: int = 42) -> Optional[Dict]:
         "students": students,
         "centroids": centroids,
     }
+    _OULAD_CACHE["result"] = oulad_result
+    return oulad_result
 
 
 def _generate_diagnostic(
@@ -259,12 +272,20 @@ def run_clustering_pipeline(db: Session, manager_id: str | None = None) -> Dict[
     Full pipeline: query users -> score -> scale -> cluster -> validate -> annotate.
     If manager_id is provided, only direct reports of that manager are included.
     Returns structured results ready for the /cohorts endpoint.
+    Results are cached in-memory and only retrained when the user count changes.
     """
+    cache_key = manager_id or "__all__"
+
     query = db.query(User).filter(User.role == "Learner")
     if manager_id:
         query = query.filter(User.manager_id == manager_id)
     users = query.all()
     modules = db.query(Module).all()
+
+    # Fast-path: return cached result if cohort size hasn't changed
+    cached = _MODEL_CACHE.get(cache_key)
+    if cached and cached["n_users"] == len(users):
+        return cached["result"]
 
     if not modules:
         return {"error": "No modules found in database."}
@@ -375,7 +396,7 @@ def run_clustering_pipeline(db: Session, manager_id: str | None = None) -> Dict[
 
     oulad = run_oulad_validation()
 
-    return {
+    result = {
         "model_validation": {
             "silhouette_score": round(sil, 4),
             "davies_bouldin_score": round(dbi, 4),
@@ -384,3 +405,12 @@ def run_clustering_pipeline(db: Session, manager_id: str | None = None) -> Dict[
         },
         "cohorts": cohort_list,
     }
+
+    # Store in cache — invalidated automatically next time user count changes
+    _MODEL_CACHE[cache_key] = {
+        "n_users": len(users),
+        "result": result,
+        "trained_at": time.time(),
+    }
+
+    return result
