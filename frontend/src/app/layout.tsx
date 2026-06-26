@@ -15,6 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('onboardiq_theme');if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();`,
           }}
