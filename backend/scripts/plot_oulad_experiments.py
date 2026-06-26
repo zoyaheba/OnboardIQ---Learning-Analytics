@@ -203,9 +203,9 @@ for i, (ax, exp_name, exp_color, vals, stab, sel) in enumerate(
     ax.set_axisbelow(True)
 
     # Silhouette 0.40 threshold line (lower bar for real data context)
-    ax.axvline(0.40, color="#94a3b8", linewidth=1.2, linestyle=":", zorder=4, label="0.40 min threshold")
+    ax.axvline(0.40, color="#94a3b8", linewidth=1.2, linestyle=":", zorder=4, label="0.40 threshold")
     # Silhouette 0.60 strong threshold
-    ax.axvline(0.60, color=BENCH_COLOR, linewidth=1.5, linestyle="--", zorder=4, label="0.60 strong threshold")
+    ax.axvline(0.60, color=BENCH_COLOR, linewidth=1.5, linestyle="--", zorder=4, label="0.60 threshold")
 
     # Value labels
     for bar, val in zip(bars, vals):
@@ -214,19 +214,6 @@ for i, (ax, exp_name, exp_color, vals, stab, sel) in enumerate(
             f"{val:.4f}", va="center", color=TITLE_COLOR, fontsize=11, fontweight="bold"
         )
 
-    # Stability + selection badge
-    sc = stab_colors[stab]
-    badge = f"  Stability: {stab}  "
-    if sel:
-        badge += "  |  [SELECTED FOR PRODUCTION]  "
-    ax.text(
-        0.99, 0.08, badge, transform=ax.transAxes, ha="right", va="bottom",
-        color=sc if not sel else "#60a5fa",
-        fontsize=9, fontweight="bold",
-        bbox=dict(boxstyle="round,pad=0.4", facecolor="#1e293b",
-                  edgecolor=sc if not sel else "#60a5fa", linewidth=1.5)
-    )
-
     # Silhouette quality annotation — placed at the Silhouette bar (index 1)
     sil_val = vals[1]
     qual = "Strong" if sil_val >= 0.60 else ("Moderate" if sil_val >= 0.40 else "Weak")
@@ -234,9 +221,9 @@ for i, (ax, exp_name, exp_color, vals, stab, sel) in enumerate(
     sil_bar = bars[1]
     ax.text(
         sil_val + 0.015,
-        sil_bar.get_y() + sil_bar.get_height() / 2 + 0.28,
+        sil_bar.get_y() + sil_bar.get_height() / 2 - 0.05,
         f"{qual} separation",
-        va="bottom", ha="left", color=qual_color,
+        va="center", ha="left", color=qual_color,
         fontsize=8, fontweight="bold"
     )
 
@@ -245,7 +232,21 @@ for i, (ax, exp_name, exp_color, vals, stab, sel) in enumerate(
             bar.set_edgecolor("#60a5fa")
             bar.set_linewidth(2)
 
-    ax.legend(fontsize=8, facecolor="#1e293b", edgecolor="#334155", labelcolor=BENCH_COLOR, loc="lower right")
+    # Stability badge
+    sc = stab_colors[stab]
+    badge = f"Stability: {stab}"
+    if sel:
+        badge += "  |  SELECTED"
+    ax.text(
+        0.99, 0.08, badge, transform=ax.transAxes, ha="right", va="bottom",
+        color=sc if not sel else "#60a5fa",
+        fontsize=9, fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="#1e293b",
+                  edgecolor=sc if not sel else "#60a5fa", linewidth=1.5)
+    )
+
+    # Legend moved to top right to avoid overlapping DBI bar
+    ax.legend(fontsize=8, facecolor="#1e293b", edgecolor="#334155", labelcolor=BENCH_COLOR, loc="upper right")
 
 plt.tight_layout(pad=2.2)
 
@@ -259,7 +260,7 @@ fig.text(
     wrap=True
 )
 
-out_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+out_dir = os.path.join(os.path.dirname(__file__), "..", "..")
 out_path = os.path.join(out_dir, "OnboardIQ_OULAD_Experiment_Individual.png")
 plt.savefig(out_path, dpi=180, bbox_inches="tight", facecolor=fig.get_facecolor())
 plt.close()
