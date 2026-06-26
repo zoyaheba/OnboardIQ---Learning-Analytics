@@ -626,8 +626,7 @@ def seed():
         #   [0,1] = Actuarial Statistics
         #   [2,3] = Actuarial Mathematics
         #   [4,5] = Business Finance
-        # Assign each user 2 modules from different tracks.
-        # Pick one representative module from each track and alternate pairings.
+        # Assign each user 1 module from every track so all 3 track domains appear.
         TRACK_OFFSETS = [0, 2, 4]  # module 0 = Stats, 2 = Math, 4 = Finance
 
         for i, profile in enumerate(REAL_LEARNERS):
@@ -642,10 +641,12 @@ def seed():
             db.add(user)
             db.flush()
 
-            # Pick 2 modules from different tracks
-            idx_a = TRACK_OFFSETS[i % 3]
-            idx_b = TRACK_OFFSETS[(i + 1) % 3]
-            assigned_modules = [seeded_modules[idx_a], seeded_modules[idx_b]]
+            # Pick one module from each of the 3 tracks
+            assigned_modules = [
+                seeded_modules[TRACK_OFFSETS[0]],
+                seeded_modules[TRACK_OFFSETS[1]],
+                seeded_modules[TRACK_OFFSETS[2]],
+            ]
 
             for mod in assigned_modules:
                 concept = module_concepts.get(mod.id)
