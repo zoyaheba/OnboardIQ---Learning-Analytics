@@ -475,43 +475,48 @@ CORE_USERS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Synthetic archetype generators
+# Real OULAD-mapped learner cohort (30 users under Jordan Manager)
+# Behavioural profiles derived from OULAD BBB-2013J cluster archetypes:
+#   Project Ready  (~10): high score, 1 attempt, fast, good reading
+#   Needs Coaching (~12): decent score, 1-2 attempts, moderate engagement
+#   At-Risk        (~8) : low score, 3+ attempts, minimal reading
 # ---------------------------------------------------------------------------
 
-def make_fast_track_user(index: int) -> dict:
-    return {
-        "name": f"FastTrack User {index:02d}",
-        "email": f"fast{index:02d}@synthetic.io",
-        "role": "Learner",
-        "score": random.uniform(85, 100),
-        "attempts": 1,
-        "completion_seconds": random.randint(30, 90),
-        "reading_duration": random.randint(90, 180),
-    }
-
-
-def make_methodical_user(index: int) -> dict:
-    return {
-        "name": f"Methodical User {index:02d}",
-        "email": f"method{index:02d}@synthetic.io",
-        "role": "Learner",
-        "score": random.uniform(80, 95),
-        "attempts": random.choice([1, 2]),
-        "completion_seconds": random.randint(180, 360),
-        "reading_duration": random.randint(240, 480),
-    }
-
-
-def make_struggling_user(index: int) -> dict:
-    return {
-        "name": f"AtRisk User {index:02d}",
-        "email": f"atrisk{index:02d}@synthetic.io",
-        "role": "Learner",
-        "score": random.uniform(40, 60),
-        "attempts": random.randint(3, 5),
-        "completion_seconds": random.randint(300, 600),
-        "reading_duration": random.randint(15, 45),
-    }
+REAL_LEARNERS = [
+    # ── Project Ready (~10) ───────────────────────────────────────────────
+    {"name": "Sahil P",          "email": "sahil.p@onboardiq.io",        "score": 92.0, "attempts": 1, "completion_seconds": 55,  "reading_duration": 160},
+    {"name": "Vincy Grover",     "email": "vincy.grover@onboardiq.io",   "score": 88.0, "attempts": 1, "completion_seconds": 70,  "reading_duration": 175},
+    {"name": "Priya Tripathi",   "email": "priya.tripathi@onboardiq.io", "score": 95.0, "attempts": 1, "completion_seconds": 45,  "reading_duration": 190},
+    {"name": "Athiq Rahaman",    "email": "athiq.r@onboardiq.io",        "score": 90.0, "attempts": 1, "completion_seconds": 60,  "reading_duration": 155},
+    {"name": "Sharath K",        "email": "sharath.k@onboardiq.io",      "score": 87.0, "attempts": 1, "completion_seconds": 80,  "reading_duration": 170},
+    {"name": "Akshay V",         "email": "akshay.v@onboardiq.io",       "score": 93.0, "attempts": 1, "completion_seconds": 50,  "reading_duration": 180},
+    {"name": "Adarsh S",         "email": "adarsh.s@onboardiq.io",       "score": 89.0, "attempts": 1, "completion_seconds": 65,  "reading_duration": 165},
+    {"name": "Sai Krishna",      "email": "sai.krishna@onboardiq.io",    "score": 91.0, "attempts": 1, "completion_seconds": 58,  "reading_duration": 172},
+    {"name": "Vijay Tripathi",   "email": "vijay.t@onboardiq.io",        "score": 86.0, "attempts": 1, "completion_seconds": 75,  "reading_duration": 158},
+    {"name": "Surya Kumar",      "email": "surya.kumar@onboardiq.io",    "score": 94.0, "attempts": 1, "completion_seconds": 48,  "reading_duration": 185},
+    # ── Needs Coaching (~12) ─────────────────────────────────────────────
+    {"name": "Mark Willson",     "email": "mark.w@onboardiq.io",         "score": 82.0, "attempts": 2, "completion_seconds": 210, "reading_duration": 260},
+    {"name": "Hussain",          "email": "hussain@onboardiq.io",        "score": 79.0, "attempts": 2, "completion_seconds": 240, "reading_duration": 280},
+    {"name": "Malikarjun Kumar", "email": "malikarjun.k@onboardiq.io",   "score": 75.0, "attempts": 2, "completion_seconds": 270, "reading_duration": 245},
+    {"name": "Afreen Khan",      "email": "afreen.k@onboardiq.io",       "score": 81.0, "attempts": 1, "completion_seconds": 200, "reading_duration": 255},
+    {"name": "Daisy Shah",       "email": "daisy.shah@onboardiq.io",     "score": 77.0, "attempts": 2, "completion_seconds": 255, "reading_duration": 270},
+    {"name": "Tanya G",          "email": "tanya.g@onboardiq.io",        "score": 80.0, "attempts": 2, "completion_seconds": 230, "reading_duration": 265},
+    {"name": "Raghav S",         "email": "raghav.s@onboardiq.io",       "score": 78.0, "attempts": 2, "completion_seconds": 245, "reading_duration": 250},
+    {"name": "Deepshika Goyal",  "email": "deepshika.g@onboardiq.io",    "score": 83.0, "attempts": 1, "completion_seconds": 195, "reading_duration": 275},
+    {"name": "Nikhil B",         "email": "nikhil.b@onboardiq.io",       "score": 76.0, "attempts": 2, "completion_seconds": 260, "reading_duration": 240},
+    {"name": "Zubia Khan",       "email": "zubia.khan@onboardiq.io",     "score": 84.0, "attempts": 1, "completion_seconds": 185, "reading_duration": 290},
+    {"name": "Santosh Kumar",    "email": "santosh.k@onboardiq.io",      "score": 74.0, "attempts": 2, "completion_seconds": 280, "reading_duration": 235},
+    {"name": "Arti Sharma",      "email": "arti.sharma@onboardiq.io",    "score": 80.0, "attempts": 2, "completion_seconds": 220, "reading_duration": 260},
+    # ── At-Risk (~8) ──────────────────────────────────────────────────────
+    {"name": "Shashank Kumar",   "email": "shashank.k@onboardiq.io",     "score": 55.0, "attempts": 4, "completion_seconds": 380, "reading_duration": 35},
+    {"name": "Harsha Iyyer",     "email": "harsha.i@onboardiq.io",       "score": 48.0, "attempts": 5, "completion_seconds": 420, "reading_duration": 28},
+    {"name": "Somnath G",        "email": "somnath.g@onboardiq.io",      "score": 52.0, "attempts": 4, "completion_seconds": 400, "reading_duration": 32},
+    {"name": "Arvind Kumar",     "email": "arvind.k@onboardiq.io",       "score": 45.0, "attempts": 5, "completion_seconds": 450, "reading_duration": 22},
+    {"name": "Prateeksha Singh", "email": "prateeksha.s@onboardiq.io",   "score": 58.0, "attempts": 3, "completion_seconds": 360, "reading_duration": 40},
+    {"name": "Juveria Anjum",    "email": "juveria.a@onboardiq.io",      "score": 50.0, "attempts": 4, "completion_seconds": 410, "reading_duration": 30},
+    {"name": "Neha J",           "email": "neha.j@onboardiq.io",         "score": 43.0, "attempts": 5, "completion_seconds": 470, "reading_duration": 20},
+    {"name": "Athira S",         "email": "athira.s@onboardiq.io",       "score": 57.0, "attempts": 3, "completion_seconds": 350, "reading_duration": 38},
+]
 
 
 # ---------------------------------------------------------------------------
@@ -602,32 +607,25 @@ def seed():
 
         db.flush()
 
-        morgan_id = core_user_objs["manager@onboardiq.io"].id
+        jordan_id = core_user_objs["jordan@onboardiq.io"].id
 
         # ------------------------------------------------------------------ #
-        # 3. Synthetic onboarding users (50 total)                           #
+        # 3. Real OULAD-mapped learner cohort (30 users under Jordan)        #
         # ------------------------------------------------------------------ #
-        print("→ Seeding 50 synthetic onboarding users (20 FastTrack / 20 Methodical / 10 AtRisk)...")
-
-        synthetic_profiles = (
-            [make_fast_track_user(i) for i in range(1, 21)]
-            + [make_methodical_user(i) for i in range(1, 21)]
-            + [make_struggling_user(i) for i in range(1, 11)]
-        )
+        print("→ Seeding 30 real OULAD-mapped learners under Jordan Manager...")
 
         ref_module = seeded_modules[0]
         ref_concept = seeded_concepts[0]
         base_time = now_utc() - timedelta(days=14)
 
-        for idx, profile in enumerate(synthetic_profiles):
-            assigned_manager_id = morgan_id
+        for profile in REAL_LEARNERS:
             user = User(
                 id=uid(),
                 name=profile["name"],
                 email=profile["email"],
-                role=profile["role"],
+                role="Learner",
                 hashed_password=hash_password("password123"),
-                manager_id=assigned_manager_id,
+                manager_id=jordan_id,
             )
             db.add(user)
             db.flush()
@@ -669,7 +667,7 @@ def seed():
         print(f"   Modules          : {total_mods}")
         print(f"   Concepts         : {total_concepts}")
         print(f"   Core users       : {len(CORE_USERS)}")
-        print(f"   Synthetic users  : {len(synthetic_profiles)}")
+        print(f"   Real OULAD users : {len(REAL_LEARNERS)}")
 
     except Exception as exc:
         db.rollback()
